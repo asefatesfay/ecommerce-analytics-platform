@@ -5,38 +5,38 @@ This diagram illustrates how data flows through the DuckDB Analytics Platform, f
 ```mermaid
 flowchart LR
     subgraph "Data Sources"
-        CSV1[customers.csv<br/>10K+ customers]
-        CSV2[orders.csv<br/>50K+ orders]
-        CSV3[products.csv<br/>1K+ products]
-        CSV4[sessions.csv<br/>100K+ sessions]
+        CSV1[customers.csv - 10K+ customers]
+        CSV2[orders.csv - 50K+ orders]
+        CSV3[products.csv - 1K+ products]
+        CSV4[sessions.csv - 100K+ sessions]
     end
 
     subgraph "ETL Processing"
-        ETL[Data Generation Script<br/>01_data_generation.py]
-        Clean[Data Cleaning<br/>• Validation<br/>• Normalization<br/>• Relationships]
+        ETL[Data Generation Script - 01_data_generation.py]
+        Clean[Data Cleaning - Validation, Normalization, Relationships]
     end
 
     subgraph "Database Layer"
-        DB[(DuckDB Database<br/>ecommerce.duckdb)]
-        Views[SQL Views<br/>• Revenue Analytics<br/>• Customer Metrics<br/>• Product Performance]
+        DB[(DuckDB Database - ecommerce.duckdb)]
+        Views[SQL Views - Revenue Analytics, Customer Metrics, Product Performance]
     end
 
     subgraph "API Endpoints"
-        EP1[/api/analytics/revenue<br/>📈 Revenue Trends]
-        EP2[/api/analytics/customers<br/>👥 Customer Behavior]
-        EP3[/api/analytics/products<br/>📦 Product Performance]
-        EP4[/api/reports<br/>📊 Custom Reports]
+        EP1[/api/analytics/revenue - Revenue Trends]
+        EP2[/api/analytics/customers - Customer Behavior]
+        EP3[/api/analytics/products - Product Performance]
+        EP4[/api/reports - Custom Reports]
     end
 
     subgraph "Frontend Components"
         Dashboard[Analytics Dashboard]
-        Charts[Interactive Charts<br/>• Line Charts<br/>• Bar Charts<br/>• Pie Charts]
-        Filters[Time Range Filters<br/>• Last 30 days<br/>• Custom Range<br/>• YoY Comparison]
+        Charts[Interactive Charts - Line Charts, Bar Charts, Pie Charts]
+        Filters[Time Range Filters - Last 30 days, Custom Range, YoY Comparison]
     end
 
     subgraph "User Interface"
-        Browser[Web Browser<br/>http://localhost:3000]
-        Mobile[Mobile Responsive<br/>Tailwind CSS]
+        Browser[Web Browser - http://localhost:3000]
+        Mobile[Mobile Responsive - Tailwind CSS]
     end
 
     %% Data Flow

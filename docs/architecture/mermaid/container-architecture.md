@@ -5,43 +5,43 @@ This diagram shows the containerized architecture using Docker Compose, includin
 ```mermaid
 graph TB
     subgraph "Development Environment"
-        DEV[Developer Machine<br/>VS Code + Extensions]
-        LOCAL[Local Testing<br/>http://localhost:3001]
+        DEV[Developer Machine - VS Code + Extensions]
+        LOCAL[Local Testing - http://localhost:3001]
     end
 
     subgraph "Container Network: app-network"
         direction TB
         
         subgraph "Frontend Container"
-            FE[Next.js Application<br/>Port: 3000/3001]
-            FE_VOL[/app Volume<br/>Hot Reload]
+            FE[Next.js Application - Port: 3000/3001]
+            FE_VOL[/app Volume - Hot Reload]
             FE --> FE_VOL
         end
 
         subgraph "Backend Container"
-            BE[FastAPI Application<br/>Port: 8000/8001]
-            BE_VOL[/app Volume<br/>Hot Reload]
+            BE[FastAPI Application - Port: 8000/8001]
+            BE_VOL[/app Volume - Hot Reload]
             BE --> BE_VOL
         end
 
         subgraph "Data Volume"
-            DB_VOL[DuckDB Data<br/>Persistent Storage]
-            CSV_VOL[CSV Files<br/>./data Volume]
+            DB_VOL[DuckDB Data - Persistent Storage]
+            CSV_VOL[CSV Files - ./data Volume]
         end
     end
 
     subgraph "Docker Compose Services"
-        COMP[docker-compose.yml<br/>Service Orchestration]
+        COMP[docker-compose.yml - Service Orchestration]
         
         subgraph "Profiles"
-            PROD_PROF[Production Profile<br/>Port: 3000, 8000]
-            DEV_PROF[Development Profile<br/>Port: 3001, 8001<br/>Hot Reload Enabled]
+            PROD_PROF[Production Profile - Port: 3000, 8000]
+            DEV_PROF[Development Profile - Port: 3001, 8001 - Hot Reload Enabled]
         end
     end
 
     subgraph "External Network"
-        INTERNET[Internet Access<br/>Package Downloads]
-        REGISTRY[Docker Registry<br/>Base Images]
+        INTERNET[Internet Access - Package Downloads]
+        REGISTRY[Docker Registry - Base Images]
     end
 
     %% Developer Workflow
@@ -50,7 +50,7 @@ graph TB
     DEV --> |Code Changes| BE_VOL
 
     %% Container Communication
-    FE --> |API Calls<br/>Port 8000/8001| BE
+    FE --> |API Calls - Port 8000/8001| BE
     BE --> |File Access| DB_VOL
     BE --> |File Access| CSV_VOL
 
@@ -73,8 +73,8 @@ graph TB
     DEV --> LOCAL
 
     %% Health Checks
-    FE -.->|Health Check<br/>/_next/static| FE
-    BE -.->|Health Check<br/>/health| BE
+    FE -.->|Health Check - /_next/static| FE
+    BE -.->|Health Check - /health| BE
 
     %% Styling
     classDef dev fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
