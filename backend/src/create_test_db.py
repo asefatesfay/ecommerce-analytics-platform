@@ -28,6 +28,7 @@ def create_test_database():
     
     # Create minimal test data
     customers_data = []
+    segments = ['Premium', 'Standard', 'Basic', 'VIP']
     for i in range(100):
         customers_data.append({
             'customer_id': f'CUST_{i:04d}',
@@ -37,7 +38,8 @@ def create_test_database():
             'registration_date': '2023-01-01',
             'city': 'TestCity',
             'state': 'TestState',
-            'country': 'TestCountry'
+            'country': 'TestCountry',
+            'customer_segment': random.choice(segments)
         })
     
     products_data = []
@@ -65,7 +67,7 @@ def create_test_database():
             'customer_id': customer_id,
             'order_date': order_date.strftime('%Y-%m-%d'),
             'total_amount': 0,
-            'order_status': random.choice(['completed', 'pending', 'cancelled'])
+            'status': random.choice(['Completed', 'Pending', 'Cancelled'])
         }
         
         # Add 1-3 items per order
@@ -114,21 +116,100 @@ def create_test_database():
     print(f"Creating database at: {db_path}")
     
     with duckdb.connect(str(db_path)) as conn:
-        # Create and populate tables
+        # Create and populate tables with proper date types
         conn.execute("CREATE TABLE customers AS SELECT * FROM customers_df")
         conn.execute("CREATE TABLE products AS SELECT * FROM products_df")
-        conn.execute("CREATE TABLE orders AS SELECT * FROM orders_df")
-        conn.execute("CREATE TABLE order_items AS SELECT * FROM order_items_df")
-        conn.execute("CREATE TABLE web_sessions AS SELECT * FROM sessions_df")
         
-        # Verify tables
-        result = conn.execute("SHOW TABLES").fetchall()
-        print(f"Created tables: {[table[0] for table in result]}")
+        # Create orders table with proper date column
+        conn.execute("""
+            CREATE TABLE orders AS 
+            SELECT 
+                order_id,
+                customer_id,
+                CAST(order_date AS DATE) as order_date,
+                total_amount,
+                status
+            FROM orders_df
+        """)
+        
+        conn.execute("CREATE TABLE order_items AS SELECT * FROM order_items_df")
+        
+        # Create web_sessions with proper date column
+        conn.execute("""
+            CREATE TABLE web_sessions AS 
+            SELECT 
+                session_id,
+                customer_id,
+                CAST(session_date AS DATE) as session_date,
+                page_views,
+                session_duration_minutes,
+                device_type,
+                traffic_source
+            FROM sessions_df
+        """)
+        
+        # Create product_performance table (derived from order_items and products)
+        conn.execute("""
+            CREATE TABLE product_performance AS
+            SELECT 
+                p.product_id,
+                p.product_name,
+                p.category,
+                p.price,
+                COALESCE(SUM(oi.quantity), 0) as units_sold,
+                COALESCE(SUM(oi.total_price), 0) as total_revenue,
+                COALESCE(COUNT(DISTINCT oi.order_id), 0) as orders_count,
+                COALESCE(AVG(oi.unit_price), p.price) as avg_selling_price,
+                CASE 
+                    WHEN COALESCE(SUM(oi.quantity), 0) > 50 THEN 'High'
+                    WHEN COALESCE(SUM(oi.quantity), 0) > 20 THEN 'Medium' 
+                    ELSE 'Low'
+                END as performance_tier
+            FROM products p
+            LEFT JOIN order_items oi ON p.product_id = oi.product_id
+            GROUP BY p.product_id, p.product_name, p.category, p.price
+        """)
+        
+        # Create customer_ltv view (Customer Lifetime Value)
+        conn.execute("""
+            CREATE VIEW customer_ltv AS
+            SELECT 
+                c.customer_id,
+                c.customer_segment,
+                COALESCE(SUM(CASE WHEN o.status = 'Completed' THEN o.total_amount ELSE 0 END), 0) as monetary,
+                COALESCE(COUNT(CASE WHEN o.status = 'Completed' THEN o.order_id END), 0) as frequency,
+                COALESCE(MAX(o.order_date), c.registration_date) as last_order_date
+            FROM customers c
+            LEFT JOIN orders o ON c.customer_id = o.customer_id
+            GROUP BY c.customer_id, c.customer_segment, c.registration_date
+        """)
+        
+        # Verify tables and views
+        tables_result = conn.execute("SHOW TABLES").fetchall()
+        views_result = conn.execute("SELECT table_name FROM information_schema.tables WHERE table_type = 'VIEW'").fetchall()
+        
+        print(f"Created tables: {[table[0] for table in tables_result]}")
+        print(f"Created views: {[view[0] for view in views_result]}")
         
         # Show row counts
-        for table in ['customers', 'products', 'orders', 'order_items', 'web_sessions']:
+        for table in ['customers', 'products', 'orders', 'order_items', 'web_sessions', 'product_performance']:
             count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
             print(f"  {table}: {count:,} rows")
+        
+        # Test a few key queries that the API uses
+        print(f"\nTesting key queries:")
+        
+        # Test orders with status
+        completed_orders = conn.execute("SELECT COUNT(*) FROM orders WHERE status = 'Completed'").fetchone()[0]
+        print(f"  Completed orders: {completed_orders:,}")
+        
+        # Test customer segments
+        segments = conn.execute("SELECT customer_segment, COUNT(*) FROM customers GROUP BY customer_segment").fetchall()
+        print(f"  Customer segments: {dict(segments)}")
+        
+        # Test product performance
+        perf_count = conn.execute("SELECT COUNT(*) FROM product_performance WHERE units_sold > 0").fetchone()[0]
+        print(f"  Products with sales: {perf_count:,}")
     
     print(f"✅ Test database created successfully at {db_path}")
     return db_path

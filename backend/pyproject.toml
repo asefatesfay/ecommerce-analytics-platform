@@ -2,7 +2,6 @@
 minversion = "7.0"
 addopts = "-v --tb=short --strict-markers"
 testpaths = ["tests"]
-python_paths = ["src"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
