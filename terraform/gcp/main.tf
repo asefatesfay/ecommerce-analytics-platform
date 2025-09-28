@@ -43,10 +43,7 @@ resource "random_string" "suffix" {
   upper   = false
 }
 
-# Data sources for project information
-data "google_project" "current" {
-  project_id = var.project_id
-}
+# Project information will be provided via variables
 
 data "google_client_config" "current" {}
 
