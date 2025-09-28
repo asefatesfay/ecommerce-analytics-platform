@@ -49,7 +49,10 @@ data "google_client_config" "current" {}
 
 # Local values for resource naming
 locals {
-  name_suffix = "${var.project_name}-${var.environment}-${random_string.suffix.result}"
+  name_suffix = "ddb-${var.environment}-${random_string.suffix.result}"
+
+  # For service accounts with 30-char limit
+  sa_prefix = "ddb-${substr(var.environment, 0, 3)}-${substr(random_string.suffix.result, 0, 4)}"
 
   common_labels = {
     environment = var.environment

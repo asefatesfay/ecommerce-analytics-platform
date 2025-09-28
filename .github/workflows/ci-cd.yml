@@ -240,11 +240,13 @@ jobs:
           -var="environment=prod" \
           -var="region=${{ env.GCP_REGION }}" \
           -var="project_name=${{ env.PROJECT_NAME }}" \
+          -var="artifact_registry_repo_id=${{ env.PROJECT_NAME }}" \
           -out=tfplan
       env:
         TF_VAR_project_id: ${{ env.GCP_PROJECT_ID }}
         TF_VAR_region: ${{ env.GCP_REGION }}
         TF_VAR_project_name: ${{ env.PROJECT_NAME }}
+        TF_VAR_artifact_registry_repo_id: ${{ env.PROJECT_NAME }}
 
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v4

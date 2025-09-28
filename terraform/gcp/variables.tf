@@ -34,6 +34,12 @@ variable "zone" {
   default     = "us-central1-a"
 }
 
+variable "artifact_registry_repo_id" {
+  description = "Artifact Registry repository ID (must be pre-created)"
+  type        = string
+  default     = "duckdb-repo"
+}
+
 # Cloud Run configuration
 variable "cloud_run_config" {
   description = "Configuration for Cloud Run services"

@@ -1,14 +1,12 @@
 # Cloud Run Configuration for DuckDB Analytics Platform
 # Provides serverless container deployment for backend and frontend services
 
-# Container Registry repositories
-resource "google_artifact_registry_repository" "app_repo" {
-  repository_id = "${local.name_suffix}-repo"
+# Reference existing Artifact Registry repository
+# Note: Create this manually if it doesn't exist:
+# gcloud artifacts repositories create duckdb-repo --repository-format=docker --location=us-west1
+data "google_artifact_registry_repository" "app_repo" {
+  repository_id = var.artifact_registry_repo_id
   location      = var.region
-  format        = "DOCKER"
-  description   = "Docker repository for DuckDB Analytics containers"
-
-  labels = local.common_labels
 }
 
 # Backend Cloud Run service

@@ -3,21 +3,21 @@
 
 # Service account for Cloud Run applications
 resource "google_service_account" "app_sa" {
-  account_id   = "${local.name_suffix}-app"
+  account_id   = "${local.sa_prefix}-app"
   display_name = "DuckDB Analytics Application Service Account"
   description  = "Service account for Cloud Run applications"
 }
 
 # Service account for monitoring and logging
 resource "google_service_account" "monitoring_sa" {
-  account_id   = "${local.name_suffix}-monitoring"
+  account_id   = "${local.sa_prefix}-mon"
   display_name = "DuckDB Analytics Monitoring Service Account"
   description  = "Service account for monitoring and logging operations"
 }
 
 # Service account for CI/CD pipeline
 resource "google_service_account" "cicd_sa" {
-  account_id   = "${local.name_suffix}-cicd"
+  account_id   = "${local.sa_prefix}-cicd"
   display_name = "DuckDB Analytics CI/CD Service Account"
   description  = "Service account for CI/CD operations"
 }
@@ -129,33 +129,25 @@ resource "google_project_iam_member" "app_run_invoker" {
   member  = "serviceAccount:${google_service_account.app_sa.email}"
 }
 
-# Custom IAM role for DuckDB operations
-resource "google_project_iam_custom_role" "duckdb_operator" {
-  role_id     = replace("${local.name_suffix}_duckdb_operator", "-", "_")
-  title       = "DuckDB Analytics Operator"
-  description = "Custom role for DuckDB Analytics operations"
-
-  permissions = [
-    "storage.objects.create",
-    "storage.objects.delete",
-    "storage.objects.get",
-    "storage.objects.list",
-    "storage.objects.update",
-    "storage.buckets.get",
-    "logging.logEntries.create",
-    "monitoring.metricDescriptors.create",
-    "monitoring.metricDescriptors.get",
-    "monitoring.metricDescriptors.list",
-    "monitoring.monitoredResourceDescriptors.get",
-    "monitoring.monitoredResourceDescriptors.list",
-    "monitoring.timeSeries.create",
-  ]
+# Use predefined roles instead of custom roles
+# Storage access for DuckDB operations
+resource "google_project_iam_member" "app_storage_object_admin" {
+  project = var.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.app_sa.email}"
 }
 
-# Assign custom role to application service account
-resource "google_project_iam_member" "app_custom_role" {
+# Logging access
+resource "google_project_iam_member" "app_logging_writer" {
   project = var.project_id
-  role    = google_project_iam_custom_role.duckdb_operator.id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.app_sa.email}"
+}
+
+# Monitoring access
+resource "google_project_iam_member" "app_monitoring_writer" {
+  project = var.project_id
+  role    = "roles/monitoring.metricWriter"
   member  = "serviceAccount:${google_service_account.app_sa.email}"
 }
 
