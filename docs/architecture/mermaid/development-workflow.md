@@ -1,3 +1,7 @@
+# Development Workflow
+
+This diagram shows the complete development workflow, from local setup to testing and deployment preparation.
+
 ```mermaid
 graph TB
     subgraph "Developer Workflow"
@@ -125,3 +129,34 @@ graph TB
     class DB_DEV,DATA_GEN,SQL_DEV data
     class FE_TOOLS,BE_TOOLS tool
 ```
+
+## Development Workflow Steps
+
+### 1. Initial Setup
+- `make setup`: Complete environment initialization
+- `make setup-data`: Generate sample analytics data
+- `make install-deps`: Install all project dependencies
+
+### 2. Development
+- `make dev`: Start both frontend and backend in development mode
+- **Frontend**: Next.js on port 3001 with hot reload
+- **Backend**: FastAPI on port 8001 with auto-reload
+
+### 3. Quality Assurance
+- `make test`: Run comprehensive test suite
+- `make lint`: Code formatting and style checks
+- **TypeScript**: Static type checking
+- **Coverage**: Test coverage reporting
+
+### 4. CI/CD Preparation
+- `make ci-test`: Simulate CI environment locally
+- `make build`: Create production Docker images
+
+## Key Features
+
+- **Automated Setup**: Single command initialization
+- **Hot Reload**: Real-time code changes in development
+- **Comprehensive Testing**: Frontend and backend test suites
+- **Code Quality**: Automated linting and formatting
+- **Type Safety**: Full TypeScript integration
+- **Database Development**: Local DuckDB with sample data

@@ -1,3 +1,7 @@
+# Data Flow Architecture
+
+This diagram illustrates how data flows through the DuckDB Analytics Platform, from raw CSV files to the interactive dashboard.
+
 ```mermaid
 flowchart LR
     subgraph "Data Sources"
@@ -80,3 +84,19 @@ flowchart LR
     class Dashboard,Charts,Filters ui
     class Browser,Mobile user
 ```
+
+## Data Pipeline Stages
+
+1. **Data Sources**: Raw CSV files containing business data
+2. **ETL Processing**: Python scripts for data transformation and loading
+3. **Database Layer**: DuckDB provides fast analytics with SQL views
+4. **API Endpoints**: RESTful services exposing business metrics
+5. **Frontend Components**: Interactive dashboard with real-time updates
+6. **User Interface**: Responsive web application accessible on all devices
+
+## Key Features
+
+- **High Performance**: DuckDB optimized for analytical workloads
+- **Real-time Updates**: WebSocket connections for live data refresh
+- **Mobile Responsive**: Tailwind CSS ensures compatibility across devices
+- **Comprehensive Analytics**: Multiple data sources consolidated into unified views

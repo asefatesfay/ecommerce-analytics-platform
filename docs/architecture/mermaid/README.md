@@ -18,23 +18,23 @@ This directory contains Mermaid-based architecture diagrams that offer several a
 ## 📊 **Mermaid Architecture Diagrams**
 
 ### 1. System Architecture
-- **File**: [system-architecture.mmd](system-architecture.mmd)
+- **File**: [system-architecture.md](system-architecture.md)
 - **Shows**: High-level system overview with component relationships
 
 ### 2. Data Flow Architecture  
-- **File**: [data-flow.mmd](data-flow.mmd)
+- **File**: [data-flow.md](data-flow.md)
 - **Shows**: End-to-end data processing pipeline
 
 ### 3. Container Architecture
-- **File**: [container-architecture.mmd](container-architecture.mmd)  
+- **File**: [container-architecture.md](container-architecture.md)  
 - **Shows**: Docker containerization and service communication
 
 ### 4. Development Workflow
-- **File**: [development-workflow.mmd](development-workflow.mmd)
+- **File**: [development-workflow.md](development-workflow.md)
 - **Shows**: Local development environment and processes
 
 ### 5. Deployment Architecture
-- **File**: [deployment-architecture.mmd](deployment-architecture.mmd)
+- **File**: [deployment-architecture.md](deployment-architecture.md)
 - **Shows**: Cloud deployment strategies (AWS/GCP)
 
 ## 🎯 **Key Advantages of Mermaid**
