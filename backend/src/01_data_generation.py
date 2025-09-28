@@ -7,9 +7,7 @@ This script creates comprehensive test data including customers, products,
 orders, and web analytics data with realistic business patterns.
 """
 
-import os
 import sys
-import pandas as pd
 import duckdb
 from pathlib import Path
 
@@ -36,7 +34,7 @@ def main():
         "end_date": "2024-12-31",
     }
 
-    print(f"Configuration:")
+    print("Configuration:")
     for key, value in config.items():
         print(f"  {key}: {value:,}" if isinstance(value, int) else f"  {key}: {value}")
     print()
@@ -139,14 +137,14 @@ def main():
         print("  ✅ Created product_performance view")
 
         # Show database summary
-        print(f"\n📈 Database Summary:")
+        print("\n📈 Database Summary:")
         tables = conn.execute("SHOW TABLES").fetchall()
         for table in tables:
             table_name = table[0]
             count = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
             print(f"  📋 {table_name}: {count:,} rows")
 
-        print(f"\n🎯 Sample Insights:")
+        print("\n🎯 Sample Insights:")
 
         # Total revenue
         total_revenue = conn.execute(
@@ -167,7 +165,7 @@ def main():
         """
         ).fetchall()
 
-        print(f"  👥 Customer Segments (by avg LTV):")
+        print("  👥 Customer Segments (by avg LTV):")
         for segment, count, avg_ltv in segments:
             print(f"     {segment}: {count:,} customers, ${avg_ltv:.2f} avg LTV")
 
@@ -182,14 +180,14 @@ def main():
         """
         ).fetchall()
 
-        print(f"  🏆 Top Product Categories:")
+        print("  🏆 Top Product Categories:")
         for category, revenue in categories:
             print(f"     {category}: ${revenue:,.2f}")
 
-    print(f"\n🚀 Setup Complete!")
+    print("\n🚀 Setup Complete!")
     print(f"   📁 Data files: {data_dir}/")
     print(f"   🗄️  Database: {db_path}")
-    print(f"   📊 Ready for analysis!")
+    print("   📊 Ready for analysis!")
 
     print(f"\n🔄 Next Steps:")
     print(f"   1. Run: python 02_basic_analysis.py")

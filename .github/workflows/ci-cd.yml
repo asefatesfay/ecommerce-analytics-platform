@@ -77,10 +77,9 @@ jobs:
 
     - name: Run Backend linting
       run: |
-        cd backend
         pip install flake8 black
-        flake8 src/ --max-line-length=88 --extend-ignore=E203,W503
-        black --check src/
+        flake8 backend/src/
+        black --check backend/src/ --line-length 120
 
     - name: Run Frontend linting
       run: |
