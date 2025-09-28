@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:ci": "eslint --max-warnings 20",
+    "test": "echo \"No tests specified yet - frontend tests coming soon!\" && exit 0",
+    "test:ci": "echo \"Testing frontend build...\" && npm run build"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
