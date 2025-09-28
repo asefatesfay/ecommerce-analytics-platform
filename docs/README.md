@@ -1,6 +1,20 @@
-# DuckDB with Python - Learning Setup Complete! 🎉
+# E-commerce Analytics Platform Documentation 📚
 
-Congratulations! You now have a comprehensive DuckDB learning environment set up with step-by-step examples.
+Welcome to the comprehensive documentation for the E-commerce Analytics Platform. This directory contains all technical documentation, guides, and architecture resources.
+
+## 🏗️ Architecture Documentation
+
+### **[📊 Complete Architecture Overview →](ARCHITECTURE_OVERVIEW.md)**
+*Start here for a comprehensive view of all system diagrams organized by functional areas*
+
+**Quick Architecture Links:**
+- **[System Architecture](architecture/diagrams/architecture_system.png)**: High-level system overview
+- **[Development Setup](architecture/diagrams/architecture_development.png)**: Local development environment  
+- **[Data Flow](architecture/diagrams/architecture_dataflow.png)**: End-to-end data processing
+- **[Container Strategy](architecture/diagrams/architecture_containers.png)**: Docker architecture
+- **[AWS Deployment](architecture/diagrams/architecture_aws_deployment.png)**: Cloud deployment on AWS
+- **[GCP Deployment](architecture/diagrams/architecture_gcp_deployment.png)**: Cloud deployment on GCP
+- **[Hybrid Cloud](architecture/diagrams/architecture_hybrid_deployment.png)**: Multi-cloud strategy
 
 ## 📂 Project Structure
 

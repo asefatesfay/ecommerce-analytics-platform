@@ -53,11 +53,17 @@ duckdb/
 
 ## 🏗️ Architecture
 
-This project features a comprehensive architecture documented as code using visual diagrams. The architecture documentation includes:
+### **[📊 Complete Architecture Overview →](docs/ARCHITECTURE_OVERVIEW.md)**
+*Comprehensive view of all system diagrams organized by functional areas with detailed explanations*
 
-- **System Architecture:** Overall system design and component relationships
-- **Container Architecture:** Docker containerization and service orchestration  
-- **Data Flow Architecture:** How data flows through the system from CSV to UI
+**Quick Architecture Overview:**
+- **[System Architecture](docs/architecture/diagrams/architecture_system.png)**: High-level system design and relationships
+- **[Development Environment](docs/architecture/diagrams/architecture_development.png)**: Local development setup and workflow
+- **[Data Flow](docs/architecture/diagrams/architecture_dataflow.png)**: End-to-end data processing pipeline
+- **[Container Strategy](docs/architecture/diagrams/architecture_containers.png)**: Docker containerization and orchestration
+- **[Cloud Deployments](docs/ARCHITECTURE_OVERVIEW.md#-deployment-architectures)**: AWS, GCP, and hybrid cloud strategies
+
+This project features a comprehensive architecture documented as code using visual diagrams generated with the [Diagrams](https://diagrams.mingrammer.com/) library.
 - **Development Architecture:** Development environment and workflow
 - **Deployment Architecture:** Production deployment strategy
 

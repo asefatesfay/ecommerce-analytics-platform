@@ -2,6 +2,9 @@
 
 This directory contains comprehensive architecture documentation for the DuckDB E-commerce Analytics project, documented as code using the [Diagrams](https://diagrams.mingrammer.com/) library.
 
+## 📊 **[Complete Architecture Overview →](../ARCHITECTURE_OVERVIEW.md)**
+*For a comprehensive, organized view of all diagrams with detailed explanations, visit the main Architecture Overview document.*
+
 ## 📁 Directory Structure
 
 ```
