@@ -58,12 +58,12 @@ output "logs_bucket_name" {
 # Container Registry information
 output "artifact_registry_repository" {
   description = "Artifact Registry repository URL"
-  value       = google_artifact_registry_repository.app_repo.name
+  value       = data.google_artifact_registry_repository.app_repo.name
 }
 
 output "docker_registry_url" {
   description = "Docker registry URL for pushing images"
-  value       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.app_repo.repository_id}"
+  value       = "${var.region}-docker.pkg.dev/${var.project_id}/${data.google_artifact_registry_repository.app_repo.repository_id}"
 }
 
 # Service Account information

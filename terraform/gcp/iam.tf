@@ -129,27 +129,7 @@ resource "google_project_iam_member" "app_run_invoker" {
   member  = "serviceAccount:${google_service_account.app_sa.email}"
 }
 
-# Use predefined roles instead of custom roles
-# Storage access for DuckDB operations
-resource "google_project_iam_member" "app_storage_object_admin" {
-  project = var.project_id
-  role    = "roles/storage.objectAdmin"
-  member  = "serviceAccount:${google_service_account.app_sa.email}"
-}
 
-# Logging access
-resource "google_project_iam_member" "app_logging_writer" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.app_sa.email}"
-}
-
-# Monitoring access
-resource "google_project_iam_member" "app_monitoring_writer" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.app_sa.email}"
-}
 
 # Workload Identity for GKE (if needed in future)
 resource "google_service_account_iam_member" "workload_identity" {

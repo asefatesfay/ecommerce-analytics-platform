@@ -34,7 +34,7 @@ resource "google_cloud_run_v2_service" "backend" {
     service_account = google_service_account.app_sa.email
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.app_repo.repository_id}/backend:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${data.google_artifact_registry_repository.app_repo.repository_id}/backend:latest"
 
       # Resource configuration
       resources {
@@ -175,7 +175,7 @@ resource "google_cloud_run_v2_service" "frontend" {
     service_account = google_service_account.app_sa.email
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.app_repo.repository_id}/frontend:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/${data.google_artifact_registry_repository.app_repo.repository_id}/frontend:latest"
 
       resources {
         limits = {
