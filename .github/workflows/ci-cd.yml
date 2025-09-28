@@ -193,12 +193,12 @@ jobs:
         build-args: |
           API_URL=${{ secrets.API_URL || 'http://localhost:8000' }}
 
-  # Terraform Plan
+  # Terraform Plan (Disabled - using GCP instead of AWS)
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: false  # Disabled until GCP Terraform is configured
     
     steps:
     - name: Checkout code
@@ -246,12 +246,12 @@ jobs:
         path: terraform/aws/tfplan
         retention-days: 30
 
-  # Deploy to AWS (only on main branch)
+  # Deploy to AWS (Disabled - using GCP instead)
   deploy-aws:
     name: Deploy to AWS
     runs-on: ubuntu-latest
     needs: [build, terraform-plan]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: false  # Disabled - migrated to GCP
     environment: production
     
     steps:
@@ -356,7 +356,7 @@ jobs:
     name: Cleanup Old Images
     runs-on: ubuntu-latest
     needs: deploy-aws
-    if: always() && github.ref == 'refs/heads/main'
+    if: false  # Disabled - using GCP Artifact Registry instead of ECR
     
     steps:
     - name: Configure AWS credentials
