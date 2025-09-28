@@ -28,7 +28,7 @@ def main():
 
     # Configuration - use minimal data for CI/testing
     minimal_mode = os.environ.get("MINIMAL_DATA", "false").lower() == "true"
-    
+
     if minimal_mode:
         config = {
             "num_customers": 100,

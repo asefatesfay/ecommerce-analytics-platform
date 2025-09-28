@@ -57,7 +57,7 @@ jobs:
     - name: Generate test data
       run: |
         cd backend/src
-        python create_test_db.py
+        MINIMAL_DATA=true python 01_data_generation.py
       env:
         PYTHONPATH: ${{ github.workspace }}/backend/src
 
@@ -79,13 +79,13 @@ jobs:
       run: |
         pip install flake8 black
         flake8 backend/src/
-        black --check backend/src/ --line-length 120
+        black --check --diff backend/src/ --line-length 120
 
-    - name: Run Frontend linting
+    - name: Run Frontend linting and type checking
       run: |
         cd frontend
-        npm run lint
         npm run type-check
+        npm run lint
 
   # Security Scanning
   security:
