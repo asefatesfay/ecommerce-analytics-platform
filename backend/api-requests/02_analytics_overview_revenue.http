@@ -1,0 +1,32 @@
+### Get Overview Analytics
+# Retrieve key performance indicators and summary metrics
+# @name overview
+GET http://localhost:8000/api/v1/analytics/overview
+
+###
+
+### Get Revenue Analytics - Daily
+# Revenue breakdown by day for the last 30 days
+# @name revenue-daily
+GET http://localhost:8000/api/v1/analytics/revenue?group_by=day&limit=30
+
+###
+
+### Get Revenue Analytics - Monthly
+# Revenue breakdown by month
+# @name revenue-monthly  
+GET http://localhost:8000/api/v1/analytics/revenue?group_by=month
+
+###
+
+### Get Revenue Analytics - Yearly
+# Revenue breakdown by year
+# @name revenue-yearly
+GET http://localhost:8000/api/v1/analytics/revenue?group_by=year
+
+###
+
+### Get Revenue Analytics - By Category
+# Revenue breakdown by product category
+# @name revenue-category
+GET http://localhost:8000/api/v1/analytics/revenue?group_by=category

@@ -1,0 +1,32 @@
+### Get Product Analytics Overview
+# Product performance and category insights
+# @name products-overview
+GET http://localhost:8000/api/v1/analytics/products
+
+###
+
+### Get Top Products by Revenue
+# Top 10 products by total revenue
+# @name products-top-revenue
+GET http://localhost:8000/api/v1/analytics/products?sort_by=revenue&limit=10
+
+###
+
+### Get Top Products by Quantity Sold
+# Top 15 products by quantity sold
+# @name products-top-quantity
+GET http://localhost:8000/api/v1/analytics/products?sort_by=quantity&limit=15
+
+###
+
+### Get Products by Category Performance
+# Product performance grouped by category
+# @name products-category
+GET http://localhost:8000/api/v1/analytics/products?group_by=category
+
+###
+
+### Get Low Performing Products
+# Products with lowest performance (bottom 10)
+# @name products-low-performance
+GET http://localhost:8000/api/v1/analytics/products?sort_by=revenue&order=asc&limit=10

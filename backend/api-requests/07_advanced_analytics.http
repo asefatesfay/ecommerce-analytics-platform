@@ -1,0 +1,34 @@
+### Complex Analytics - Monthly Revenue Trend
+# Monthly revenue with category breakdown
+# @name complex-monthly-trend
+GET http://localhost:8000/api/v1/analytics/revenue?group_by=month&include_categories=true
+
+###
+
+### Complex Analytics - Customer Lifetime Value by Segment
+# Deep dive into customer segments and their value
+# @name complex-customer-ltv
+GET http://localhost:8000/api/v1/analytics/customers?segment_type=rfm&include_ltv=true
+
+###
+
+### Complex Analytics - Product Performance Matrix
+# Comprehensive product analysis with profitability
+# @name complex-product-matrix
+GET http://localhost:8000/api/v1/analytics/products?include_profitability=true&group_by=category
+
+###
+
+### Complex Analytics - Marketing Attribution Analysis
+# Full marketing funnel analysis with conversion rates
+# @name complex-marketing-attribution
+GET http://localhost:8000/api/v1/analytics/marketing?include_conversion_funnel=true
+
+###
+
+### Business Intelligence - Executive Summary
+# Combined metrics for executive reporting
+# @name executive-summary
+GET http://localhost:8000/api/v1/analytics/overview
+
+###

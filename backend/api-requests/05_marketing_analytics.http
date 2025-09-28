@@ -1,0 +1,32 @@
+### Get Marketing Analytics Overview
+# Marketing channel performance and attribution
+# @name marketing-overview
+GET http://localhost:8000/api/v1/analytics/marketing
+
+###
+
+### Get Marketing by Traffic Source
+# Performance breakdown by traffic source
+# @name marketing-traffic-source
+GET http://localhost:8000/api/v1/analytics/marketing?group_by=traffic_source
+
+###
+
+### Get Marketing by Device Type
+# Performance breakdown by device type
+# @name marketing-device
+GET http://localhost:8000/api/v1/analytics/marketing?group_by=device_type
+
+###
+
+### Get Marketing by Campaign Performance
+# Marketing campaign effectiveness
+# @name marketing-campaigns
+GET http://localhost:8000/api/v1/analytics/marketing?group_by=campaign
+
+###
+
+### Get Marketing ROI Analysis
+# Return on investment for marketing efforts
+# @name marketing-roi
+GET http://localhost:8000/api/v1/analytics/marketing?include_roi=true

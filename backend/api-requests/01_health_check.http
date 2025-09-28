@@ -1,0 +1,17 @@
+### Health Check
+# Check if the API is running and healthy
+GET http://localhost:8000/
+
+###
+
+### API Documentation
+# Open interactive API docs in browser
+# @name docs
+GET http://localhost:8000/docs
+
+###
+
+### Alternative API Documentation  
+# Open ReDoc documentation in browser
+# @name redoc
+GET http://localhost:8000/redoc

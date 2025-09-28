@@ -1,0 +1,25 @@
+### Get Customer Analytics Overview
+# Customer segmentation and behavior insights
+# @name customers-overview
+GET http://localhost:8000/api/v1/analytics/customers
+
+###
+
+### Get Customer Analytics - RFM Segments
+# Customer segmentation using RFM analysis (Recency, Frequency, Monetary)
+# @name customers-rfm
+GET http://localhost:8000/api/v1/analytics/customers?segment_type=rfm
+
+###
+
+### Get Customer Analytics - Acquisition Channel
+# Customer breakdown by acquisition channel
+# @name customers-channel
+GET http://localhost:8000/api/v1/analytics/customers?segment_type=acquisition_channel
+
+###
+
+### Get Customer Analytics - Top Customers
+# Top 20 customers by lifetime value
+# @name customers-top
+GET http://localhost:8000/api/v1/analytics/customers?limit=20

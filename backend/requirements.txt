@@ -1,0 +1,29 @@
+# FastAPI REST API Requirements
+
+# Core DuckDB and data processing
+duckdb>=1.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# REST API Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Data validation and serialization
+pydantic>=2.4.0
+
+# HTTP client for testing
+httpx>=0.25.0
+
+# Optional: Authentication and security
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.6
+passlib[bcrypt]>=1.7.4
+
+# Optional: Caching and performance  
+redis>=5.0.0
+slowapi>=0.1.9  # Rate limiting
+
+# Optional: Database connection pooling
+asyncpg>=0.29.0  # For PostgreSQL async
+aiopg>=1.4.0     # Alternative PostgreSQL async

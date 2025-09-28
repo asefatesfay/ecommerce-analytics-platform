@@ -1,0 +1,26 @@
+### Get Recent Orders - Default (10 orders)
+# Latest orders with customer and product information
+# @name recent-orders-default
+GET http://localhost:8000/api/v1/reports/recent-orders
+
+###
+
+### Get Recent Orders - Last 25
+# Get the most recent 25 orders
+# @name recent-orders-25
+GET http://localhost:8000/api/v1/reports/recent-orders?limit=25
+
+###
+
+### Get Recent Orders - Last 50 with Details
+# Comprehensive view of recent order activity
+# @name recent-orders-detailed
+GET http://localhost:8000/api/v1/reports/recent-orders?limit=50
+
+###
+
+### Get Recent High-Value Orders
+# Filter for high-value orders (assuming $500+ orders)
+# Note: This might need additional API endpoint for filtering
+# @name recent-orders-high-value
+GET http://localhost:8000/api/v1/reports/recent-orders?limit=100
