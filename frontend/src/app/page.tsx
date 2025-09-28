@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { AnalyticsService } from '../services/analytics';
 import { MetricCard } from '../components/MetricCard';
 import { SimpleChart } from '../components/SimpleChart';
 import { MetricDetailModal } from '../components/MetricDetailModal';
-import { formatCurrency, formatNumber, formatPercent } from '../lib/utils';
-import { OverviewMetrics, RevenueData, CustomerData } from '../types/analytics';
+import { formatCurrency, formatNumber } from '../lib/utils';
+import { OverviewMetrics, RevenueData } from '../types/analytics';
 
 type ChartDataPoint = {
   period: string;
@@ -140,18 +140,7 @@ export default function Dashboard() {
     }>;
   } | null>(null);
 
-  useEffect(() => {
-    setMounted(true);
-    fetchAllData();
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      fetchAllData();
-    }
-  }, [selectedTimeRange, selectedSegmentType, mounted]);
-
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -176,7 +165,6 @@ export default function Dashboard() {
       setRevenueData(filteredChartData);
 
       // Generate customer data based on filtered overview data and API customers data
-      const customerSegments = apiCustomers?.rfm_segments || [];
       const totalCustomers = filteredOverview?.total_customers || 1000;
       const mockCustomerData = {
         segments: selectedSegmentType === 'rfm' 
@@ -206,7 +194,18 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTimeRange, selectedSegmentType]);
+
+  useEffect(() => {
+    setMounted(true);
+    fetchAllData();
+  }, [fetchAllData]);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchAllData();
+    }
+  }, [selectedTimeRange, selectedSegmentType, mounted, fetchAllData]);
 
   const showRevenueModal = () => {
     if (!overviewData) return;

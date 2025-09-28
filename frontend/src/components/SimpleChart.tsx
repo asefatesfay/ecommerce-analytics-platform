@@ -66,9 +66,6 @@ export function SimpleChart({ title, data, type = 'revenue' }: ChartProps) {
       <h3 
         onClick={() => {
           const total = data.reduce((sum, item) => sum + (type === 'revenue' ? item.revenue : item.orders), 0);
-          const avg = total / data.length;
-          const max = Math.max(...data.map(d => type === 'revenue' ? d.revenue : d.orders));
-          const min = Math.min(...data.map(d => type === 'revenue' ? d.revenue : d.orders));
           // Use modal for chart summary
           const summaryData = {
             period: `${title} Summary (${data.length} periods)`,

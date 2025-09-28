@@ -14,7 +14,6 @@ interface ChartDetailModalProps {
 export function ChartDetailModal({ 
   isOpen, 
   onClose, 
-  title, 
   period, 
   revenue, 
   orders, 

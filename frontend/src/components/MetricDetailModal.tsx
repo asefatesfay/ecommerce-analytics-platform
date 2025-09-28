@@ -1,5 +1,5 @@
 import { Modal } from './Modal';
-import { formatCurrency, formatNumber, formatPercent } from '../lib/utils';
+import { formatCurrency, formatNumber } from '../lib/utils';
 
 interface MetricDetailModalProps {
   isOpen: boolean;
