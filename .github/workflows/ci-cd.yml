@@ -193,192 +193,210 @@ jobs:
         build-args: |
           API_URL=${{ secrets.API_URL || 'http://localhost:8000' }}
 
-  # Terraform Plan (Disabled - using GCP instead of AWS)
-  terraform-plan:
-    name: Terraform Plan
+  # GCP Terraform Plan
+  terraform-plan-gcp:
+    name: Terraform Plan (GCP)
     runs-on: ubuntu-latest
     needs: build
-    if: false  # Disabled until GCP Terraform is configured
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.5.0
+        terraform_version: 1.9.0
 
     - name: Terraform Format Check
       run: |
-        cd terraform/aws
+        cd terraform/gcp
         terraform fmt -check
 
     - name: Terraform Init
       run: |
-        cd terraform/aws
+        cd terraform/gcp
         terraform init
 
     - name: Terraform Validate
       run: |
-        cd terraform/aws
+        cd terraform/gcp
         terraform validate
 
     - name: Terraform Plan
       run: |
-        cd terraform/aws
-        terraform plan -var="environment=${{ github.ref_name }}" -out=tfplan
+        cd terraform/gcp
+        terraform plan \
+          -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+          -var="environment=${{ github.ref_name }}" \
+          -var="region=${{ env.GCP_REGION }}" \
+          -var="project_name=${{ env.PROJECT_NAME }}" \
+          -out=tfplan
       env:
+        TF_VAR_project_id: ${{ env.GCP_PROJECT_ID }}
+        TF_VAR_region: ${{ env.GCP_REGION }}
         TF_VAR_project_name: ${{ env.PROJECT_NAME }}
-        TF_VAR_aws_region: ${{ env.AWS_REGION }}
 
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v4
       with:
-        name: terraform-plan-${{ github.ref_name }}
-        path: terraform/aws/tfplan
+        name: terraform-plan-gcp-${{ github.ref_name }}
+        path: terraform/gcp/tfplan
         retention-days: 30
 
-  # Deploy to AWS (Disabled - using GCP instead)
-  deploy-aws:
-    name: Deploy to AWS
+  # Deploy to GCP
+  deploy-gcp:
+    name: Deploy to GCP
     runs-on: ubuntu-latest
-    needs: [build, terraform-plan]
-    if: false  # Disabled - migrated to GCP
+    needs: [build, terraform-plan-gcp]
+    if: github.ref == 'refs/heads/main'
     environment: production
+    
+    outputs:
+      backend-url: ${{ steps.terraform-outputs.outputs.backend-url }}
+      frontend-url: ${{ steps.terraform-outputs.outputs.frontend-url }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.5.0
+        terraform_version: 1.9.0
+        terraform_wrapper: false
 
     - name: Download Terraform Plan
       uses: actions/download-artifact@v4
       with:
-        name: terraform-plan-main
-        path: terraform/aws/
+        name: terraform-plan-gcp-main
+        path: terraform/gcp/
 
     - name: Terraform Init
       run: |
-        cd terraform/aws
+        cd terraform/gcp
         terraform init
 
     - name: Terraform Apply
       run: |
-        cd terraform/aws
+        cd terraform/gcp
         terraform apply -auto-approve tfplan
 
     - name: Get deployment outputs
       id: terraform-outputs
       run: |
-        cd terraform/aws
-        echo "load-balancer-dns=$(terraform output -raw load_balancer_dns_name)" >> $GITHUB_OUTPUT
-        echo "application-url=$(terraform output -raw application_url)" >> $GITHUB_OUTPUT
+        cd terraform/gcp
+        echo "backend-url=$(terraform output -raw backend_url)" >> $GITHUB_OUTPUT
+        echo "frontend-url=$(terraform output -raw frontend_url)" >> $GITHUB_OUTPUT
+        echo "Load balancer URL: $(terraform output -raw frontend_url)"
 
-    - name: Update ECS Services
+    - name: Update Cloud Run Services
       run: |
-        # Force new deployment to pick up latest images
-        aws ecs update-service \
-          --cluster ${{ env.PROJECT_NAME }}-cluster \
-          --service ${{ env.PROJECT_NAME }}-backend \
-          --force-new-deployment \
-          --region ${{ env.AWS_REGION }}
+        # Force new deployment to pick up latest images from Artifact Registry
+        gcloud run services update ${{ env.PROJECT_NAME }}-backend \
+          --region ${{ env.GCP_REGION }} \
+          --image ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}/backend:main-${{ github.sha }} \
+          --quiet
 
-        aws ecs update-service \
-          --cluster ${{ env.PROJECT_NAME }}-cluster \
-          --service ${{ env.PROJECT_NAME }}-frontend \
-          --force-new-deployment \
-          --region ${{ env.AWS_REGION }}
+        gcloud run services update ${{ env.PROJECT_NAME }}-frontend \
+          --region ${{ env.GCP_REGION }} \
+          --image ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}/frontend:main-${{ github.sha }} \
+          --quiet
 
     - name: Wait for deployment to complete
       run: |
-        echo "Waiting for backend service to stabilize..."
-        aws ecs wait services-stable \
-          --cluster ${{ env.PROJECT_NAME }}-cluster \
-          --services ${{ env.PROJECT_NAME }}-backend \
-          --region ${{ env.AWS_REGION }}
-
-        echo "Waiting for frontend service to stabilize..."
-        aws ecs wait services-stable \
-          --cluster ${{ env.PROJECT_NAME }}-cluster \
-          --services ${{ env.PROJECT_NAME }}-frontend \
-          --region ${{ env.AWS_REGION }}
+        echo "Waiting for services to become available..."
+        
+        # Wait for backend service
+        while ! gcloud run services describe ${{ env.PROJECT_NAME }}-backend \
+          --region ${{ env.GCP_REGION }} \
+          --format="value(status.conditions[0].status)" | grep -q "True"; do
+          echo "Waiting for backend service..."
+          sleep 10
+        done
+        
+        # Wait for frontend service  
+        while ! gcloud run services describe ${{ env.PROJECT_NAME }}-frontend \
+          --region ${{ env.GCP_REGION }} \
+          --format="value(status.conditions[0].status)" | grep -q "True"; do
+          echo "Waiting for frontend service..."
+          sleep 10
+        done
 
     - name: Run smoke tests
       run: |
         # Test API health endpoint
-        curl -f ${{ steps.terraform-outputs.outputs.application-url }}/api/v1/health
+        curl -f ${{ steps.terraform-outputs.outputs.backend-url }}/api/v1/health || curl -f ${{ steps.terraform-outputs.outputs.backend-url }}/health
         
         # Test frontend
-        curl -f ${{ steps.terraform-outputs.outputs.application-url }}
+        curl -f ${{ steps.terraform-outputs.outputs.frontend-url }}
       timeout-minutes: 5
 
     - name: Notify deployment success
-      uses: 8398a7/action-slack@v3
-      if: success()
-      with:
-        status: success
-        text: '🚀 Successfully deployed DuckDB Analytics to AWS!'
-        fields: repo,message,commit,author,action,eventName,ref,workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: success() && github.event_name == 'push'
+      run: |
+        echo "🚀 Successfully deployed DuckDB Analytics to GCP!"
+        echo "Backend URL: ${{ steps.terraform-outputs.outputs.backend-url }}"
+        echo "Frontend URL: ${{ steps.terraform-outputs.outputs.frontend-url }}"
 
     - name: Notify deployment failure
-      uses: 8398a7/action-slack@v3
       if: failure()
-      with:
-        status: failure
-        text: '❌ Failed to deploy DuckDB Analytics to AWS'
-        fields: repo,message,commit,author,action,eventName,ref,workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        echo "❌ Failed to deploy DuckDB Analytics to GCP"
+        echo "Check the logs above for details"
 
   # Cleanup old images
-  cleanup:
-    name: Cleanup Old Images
+  cleanup-gcp:
+    name: Cleanup Old Images (GCP)
     runs-on: ubuntu-latest
-    needs: deploy-aws
-    if: false  # Disabled - using GCP Artifact Registry instead of ECR
+    needs: deploy-gcp
+    if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Delete old ECR images
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Delete old Artifact Registry images
       run: |
         # Keep only the latest 10 images in each repository
-        aws ecr list-images --repository-name ${{ env.PROJECT_NAME }}/backend \
-          --filter tagStatus=UNTAGGED \
-          --query 'imageIds[?imageDigest!=null]' \
-          --output json | \
-        jq '.[:10]' | \
-        aws ecr batch-delete-image --repository-name ${{ env.PROJECT_NAME }}/backend --image-ids file:///dev/stdin || true
+        echo "Cleaning up old backend images..."
+        gcloud artifacts docker images list \
+          ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}/backend \
+          --sort-by="~CREATE_TIME" \
+          --limit=999 \
+          --format="value(IMAGE)" | \
+        tail -n +11 | \
+        xargs -r -I {} gcloud artifacts docker images delete {} --quiet || true
 
-        aws ecr list-images --repository-name ${{ env.PROJECT_NAME }}/frontend \
-          --filter tagStatus=UNTAGGED \
-          --query 'imageIds[?imageDigest!=null]' \
-          --output json | \
-        jq '.[:10]' | \
-        aws ecr batch-delete-image --repository-name ${{ env.PROJECT_NAME }}/frontend --image-ids file:///dev/stdin || true
+        echo "Cleaning up old frontend images..."  
+        gcloud artifacts docker images list \
+          ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}/frontend \
+          --sort-by="~CREATE_TIME" \
+          --limit=999 \
+          --format="value(IMAGE)" | \
+        tail -n +11 | \
+        xargs -r -I {} gcloud artifacts docker images delete {} --quiet || true
+
+        echo "Cleanup completed successfully!"

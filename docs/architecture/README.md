@@ -1,9 +1,29 @@
 # Architecture Documentation
 
-This directory contains comprehensive architecture documentation for the DuckDB E-commerce Analytics project, documented as code using the [Diagrams](https://diagrams.mingrammer.com/) library.
+This directory contains comprehensive architecture documentation for the DuckDB E-commerce Analytics project with two approaches:
 
 ## 📊 **[Complete Architecture Overview →](../ARCHITECTURE_OVERVIEW.md)**
 *For a comprehensive, organized view of all diagrams with detailed explanations, visit the main Architecture Overview document.*
+
+## 🆚 **Two Diagram Approaches Available**
+
+### **🎨 [Mermaid Diagrams →](mermaid/)**  
+**✅ Recommended** - Modern, text-based approach
+- **Native GitHub rendering** in markdown
+- **Version control friendly** - clear diffs  
+- **Easy collaboration** - any developer can edit
+- **Live preview** in VS Code and other editors
+- **No build process** required
+
+### **🐍 [Python Diagrams →](generate_architecture_diagrams.py)**  
+Traditional programmatic approach  
+- **Rich cloud icons** (AWS/GCP/Azure)
+- **Professional styling** for presentations
+- **Automated generation** from infrastructure code  
+- **High-resolution exports** for documentation
+
+### **📋 [Detailed Comparison →](mermaid/COMPARISON.md)**
+Side-by-side analysis of both approaches with recommendations.
 
 ## 📁 Directory Structure
 
