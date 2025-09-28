@@ -539,7 +539,7 @@ async def get_marketing_analytics(
 
 @app.get("/api/v1/reports/recent-orders")
 async def get_recent_orders(
-    limit: int = Query(50, description="Number of recent orders to return"),
+    limit: int = Query(50, ge=1, le=1000, description="Number of recent orders to return"),
     db: duckdb.DuckDBPyConnection = Depends(get_db)
 ):
     """Get recent orders for real-time monitoring."""
@@ -563,8 +563,8 @@ async def get_recent_orders(
         return {
             "recent_orders": [
                 {
-                    "order_id": int(row['order_id']),
-                    "customer_id": int(row['customer_id']),
+                    "order_id": str(row['order_id']),
+                    "customer_id": str(row['customer_id']),
                     "order_date": str(row['order_date']),
                     "status": row['status'],
                     "payment_method": row['payment_method'],

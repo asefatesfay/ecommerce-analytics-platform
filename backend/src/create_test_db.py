@@ -29,6 +29,7 @@ def create_test_database():
     # Create minimal test data
     customers_data = []
     segments = ['Premium', 'Standard', 'Basic', 'VIP']
+    channels = ['organic', 'paid_search', 'social_media', 'email', 'direct', 'referral']
     for i in range(100):
         customers_data.append({
             'customer_id': f'CUST_{i:04d}',
@@ -39,7 +40,8 @@ def create_test_database():
             'city': 'TestCity',
             'state': 'TestState',
             'country': 'TestCountry',
-            'customer_segment': random.choice(segments)
+            'customer_segment': random.choice(segments),
+            'acquisition_channel': random.choice(channels)
         })
     
     products_data = []
@@ -67,7 +69,8 @@ def create_test_database():
             'customer_id': customer_id,
             'order_date': order_date.strftime('%Y-%m-%d'),
             'total_amount': 0,
-            'status': random.choice(['Completed', 'Pending', 'Cancelled'])
+            'status': random.choice(['Completed', 'Pending', 'Cancelled']),
+            'payment_method': random.choice(['credit_card', 'debit_card', 'paypal', 'bank_transfer'])
         }
         
         # Add 1-3 items per order
@@ -102,7 +105,8 @@ def create_test_database():
             'page_views': random.randint(1, 20),
             'session_duration_minutes': random.randint(1, 120),
             'device_type': random.choice(['desktop', 'mobile', 'tablet']),
-            'traffic_source': random.choice(['organic', 'paid', 'direct', 'social'])
+            'traffic_source': random.choice(['organic', 'paid', 'direct', 'social']),
+            'converted': random.choice([True, False])  # Conversion tracking
         })
     
     # Create DataFrames
@@ -112,7 +116,11 @@ def create_test_database():
     order_items_df = pd.DataFrame(order_items_data)
     sessions_df = pd.DataFrame(sessions_data)
     
-    # Create DuckDB database
+    # Create DuckDB database (remove if exists)
+    if db_path.exists():
+        print(f"Removing existing database: {db_path}")
+        db_path.unlink()
+    
     print(f"Creating database at: {db_path}")
     
     with duckdb.connect(str(db_path)) as conn:
@@ -128,7 +136,8 @@ def create_test_database():
                 customer_id,
                 CAST(order_date AS DATE) as order_date,
                 total_amount,
-                status
+                status,
+                payment_method
             FROM orders_df
         """)
         
@@ -144,7 +153,8 @@ def create_test_database():
                 page_views,
                 session_duration_minutes,
                 device_type,
-                traffic_source
+                traffic_source,
+                converted
             FROM sessions_df
         """)
         
@@ -157,9 +167,12 @@ def create_test_database():
                 p.category,
                 p.price,
                 COALESCE(SUM(oi.quantity), 0) as units_sold,
+                COALESCE(SUM(oi.quantity), 0) as total_quantity_sold,
                 COALESCE(SUM(oi.total_price), 0) as total_revenue,
                 COALESCE(COUNT(DISTINCT oi.order_id), 0) as orders_count,
+                COALESCE(COUNT(DISTINCT oi.order_id), 0) as times_ordered,  -- Alias for orders_count
                 COALESCE(AVG(oi.unit_price), p.price) as avg_selling_price,
+                COALESCE(AVG(oi.unit_price * 0.3), p.price * 0.3) as avg_profit_per_unit,
                 CASE 
                     WHEN COALESCE(SUM(oi.quantity), 0) > 50 THEN 'High'
                     WHEN COALESCE(SUM(oi.quantity), 0) > 20 THEN 'Medium' 
@@ -172,18 +185,22 @@ def create_test_database():
         
         # Create customer_ltv view (Customer Lifetime Value)
         conn.execute("""
-            CREATE VIEW customer_ltv AS
+            CREATE OR REPLACE VIEW customer_ltv AS
             SELECT 
                 c.customer_id,
                 c.customer_segment,
+                c.acquisition_channel,
                 COALESCE(SUM(CASE WHEN o.status = 'Completed' THEN o.total_amount ELSE 0 END), 0) as monetary,
+                COALESCE(SUM(CASE WHEN o.status = 'Completed' THEN o.total_amount ELSE 0 END), 0) as lifetime_value,
                 COALESCE(COUNT(CASE WHEN o.status = 'Completed' THEN o.order_id END), 0) as frequency,
-                COALESCE(MAX(o.order_date), c.registration_date) as last_order_date
+                COALESCE(COUNT(o.order_id), 0) as total_orders,  -- Total orders including all statuses
+                COALESCE(MAX(o.order_date), CAST(c.registration_date AS DATE)) as last_order_date
             FROM customers c
             LEFT JOIN orders o ON c.customer_id = o.customer_id
-            GROUP BY c.customer_id, c.customer_segment, c.registration_date
+            GROUP BY c.customer_id, c.customer_segment, c.acquisition_channel, c.registration_date
         """)
         
+
         # Verify tables and views
         tables_result = conn.execute("SHOW TABLES").fetchall()
         views_result = conn.execute("SELECT table_name FROM information_schema.tables WHERE table_type = 'VIEW'").fetchall()
@@ -208,7 +225,7 @@ def create_test_database():
         print(f"  Customer segments: {dict(segments)}")
         
         # Test product performance
-        perf_count = conn.execute("SELECT COUNT(*) FROM product_performance WHERE units_sold > 0").fetchone()[0]
+        perf_count = conn.execute("SELECT COUNT(*) FROM product_performance WHERE total_quantity_sold > 0").fetchone()[0]
         print(f"  Products with sales: {perf_count:,}")
     
     print(f"✅ Test database created successfully at {db_path}")

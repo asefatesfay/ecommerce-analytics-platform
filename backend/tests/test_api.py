@@ -39,8 +39,8 @@ class TestAnalyticsEndpoints:
         assert response.status_code == 200
         data = response.json()
         
-        # Check required fields
-        required_fields = ["total_revenue", "total_orders", "avg_order_value", "customer_count"]
+        # Check required fields (updated to match actual API response)
+        required_fields = ["total_revenue", "total_orders", "avg_order_value", "total_customers"]
         for field in required_fields:
             assert field in data, f"Missing field: {field}"
             assert isinstance(data[field], (int, float)), f"Field {field} should be numeric"
@@ -91,10 +91,11 @@ class TestReportsEndpoints:
         assert response.status_code == 200
         data = response.json()
         
-        assert isinstance(data, list)
+        assert "recent_orders" in data
+        assert isinstance(data["recent_orders"], list)
         
-        if data:
-            first_order = data[0]
+        if data["recent_orders"]:
+            first_order = data["recent_orders"][0]
             assert "order_id" in first_order
             assert "order_date" in first_order
     
@@ -104,8 +105,9 @@ class TestReportsEndpoints:
         assert response.status_code == 200
         data = response.json()
         
-        assert isinstance(data, list)
-        assert len(data) <= 5
+        assert "recent_orders" in data
+        assert isinstance(data["recent_orders"], list)
+        assert len(data["recent_orders"]) <= 5
 
 
 class TestParameterValidation:
