@@ -74,6 +74,9 @@ yarn.lock
 out/
 build/
 
+# TypeScript
+*.tsbuildinfo
+
 # Runtime data
 pids
 *.pid
@@ -121,6 +124,8 @@ terraform.rc
 *.db
 *.duckdb
 *.ddb
+data/
+backend/data/
 data/*.parquet
 data/*.csv
 data/*.json
