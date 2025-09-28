@@ -31,3 +31,7 @@ slowapi>=0.1.9  # Rate limiting
 # Optional: Database connection pooling
 asyncpg>=0.29.0  # For PostgreSQL async
 aiopg>=1.4.0     # Alternative PostgreSQL async
+
+# Code quality and linting
+flake8>=7.0.0
+black>=25.0.0

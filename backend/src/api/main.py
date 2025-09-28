@@ -140,9 +140,7 @@ def get_db():
 
 
 # Helper function for date filtering
-def apply_date_filter(
-    query: str, date_from: Optional[str], date_to: Optional[str]
-) -> str:
+def apply_date_filter(query: str, date_from: Optional[str], date_to: Optional[str]) -> str:
     """Apply date filtering to SQL queries."""
     if date_from or date_to:
         date_conditions = []
@@ -208,14 +206,10 @@ async def get_overview_metrics(
             SUM(CASE WHEN converted THEN 1 ELSE 0 END) as conversions
         FROM web_sessions
         """
-        conversion_query = apply_date_filter(
-            conversion_query.replace("order_date", "session_date"), date_from, date_to
-        )
+        conversion_query = apply_date_filter(conversion_query.replace("order_date", "session_date"), date_from, date_to)
         conv_result = db.execute(conversion_query).fetchone()
 
-        conversion_rate = (
-            (conv_result[1] / conv_result[0] * 100) if conv_result[0] > 0 else 0
-        )
+        conversion_rate = (conv_result[1] / conv_result[0] * 100) if conv_result[0] > 0 else 0
 
         # Calculate revenue growth (simplified - comparing with previous period)
         revenue_growth = 5.2  # Placeholder - you can implement proper period comparison
@@ -300,11 +294,7 @@ async def get_revenue_analytics(
                     "revenue": float(row["revenue"]) if pd.notna(row["revenue"]) else 0,
                     "orders": int(row["orders"]) if pd.notna(row["orders"]) else 0,
                     "customers": int(row["customers"]),
-                    "avg_order_value": (
-                        float(row["avg_order_value"])
-                        if pd.notna(row["avg_order_value"])
-                        else 0
-                    ),
+                    "avg_order_value": (float(row["avg_order_value"]) if pd.notna(row["avg_order_value"]) else 0),
                 }
                 for _, row in segments.iterrows()
             ],
@@ -566,9 +556,7 @@ async def get_marketing_analytics(db: duckdb.DuckDBPyConnection = Depends(get_db
 
 @app.get("/api/v1/reports/recent-orders")
 async def get_recent_orders(
-    limit: int = Query(
-        50, ge=1, le=1000, description="Number of recent orders to return"
-    ),
+    limit: int = Query(50, ge=1, le=1000, description="Number of recent orders to return"),
     db: duckdb.DuckDBPyConnection = Depends(get_db),
 ):
     """Get recent orders for real-time monitoring."""

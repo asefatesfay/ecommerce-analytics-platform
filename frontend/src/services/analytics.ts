@@ -28,66 +28,45 @@ apiClient.interceptors.response.use(
 );
 
 export class AnalyticsService {
-  static async getOverview(): Promise<any> {
+  static async getOverview(): Promise<OverviewMetrics> {
     console.log('🚀 Making API call to /api/v1/analytics/overview');
-    const response = await apiClient.get(
+    const response = await apiClient.get<OverviewMetrics>(
       '/api/v1/analytics/overview'
     );
     console.log('📡 Raw API response:', response);
     console.log('📄 Response data:', response.data);
     console.log('🔍 Response structure:', typeof response.data);
     
-    // Handle different response structures
-    if (response.data && response.data.data) {
-      console.log('✅ Using response.data.data');
-      return response.data.data;
-    } else if (response.data) {
-      console.log('✅ Using response.data directly');
-      return response.data;
-    } else {
-      console.error('❌ Unexpected response structure');
-      throw new Error('Invalid response structure');
-    }
+    // The FastAPI endpoint returns the data directly, not wrapped
+    return response.data;
   }
 
   static async getRevenue(params?: {
-    group_by?: 'day' | 'month' | 'year' | 'category';
-    limit?: number;
-  }): Promise<any> {
+    group_by?: 'day' | 'week' | 'month' | 'quarter';
+    date_from?: string;
+    date_to?: string;
+  }): Promise<RevenueData> {
     console.log('🚀 Making API call to revenue endpoint');
-    const response = await apiClient.get(
+    const response = await apiClient.get<RevenueData>(
       '/api/v1/analytics/revenue',
       { params }
     );
     console.log('📊 Revenue response:', response.data);
     
-    // Handle different response structures
-    if (response.data && response.data.data) {
-      return response.data.data;
-    } else if (response.data) {
-      return response.data;
-    }
-    return null;
+    return response.data;
   }
 
   static async getCustomers(params?: {
-    segment_type?: 'rfm' | 'acquisition_channel';
-    limit?: number;
-  }): Promise<any> {
+    segment?: string;
+  }): Promise<CustomerData> {
     console.log('🚀 Making API call to customers endpoint');
-    const response = await apiClient.get(
+    const response = await apiClient.get<CustomerData>(
       '/api/v1/analytics/customers',
       { params }
     );
     console.log('👥 Customer response:', response.data);
     
-    // Handle different response structures
-    if (response.data && response.data.data) {
-      return response.data.data;
-    } else if (response.data) {
-      return response.data;
-    }
-    return null;
+    return response.data;
   }
 
   static async healthCheck(): Promise<{ status: string; timestamp: string }> {

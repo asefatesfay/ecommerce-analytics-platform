@@ -72,9 +72,7 @@ def main():
 
             # Create table from DataFrame
             conn.register(f"{name}_temp", df)
-            conn.execute(
-                f"CREATE OR REPLACE TABLE {table_name} AS SELECT * FROM {name}_temp"
-            )
+            conn.execute(f"CREATE OR REPLACE TABLE {table_name} AS SELECT * FROM {name}_temp")
 
             print(f"  ✅ Created table '{table_name}': {len(df):,} rows")
 

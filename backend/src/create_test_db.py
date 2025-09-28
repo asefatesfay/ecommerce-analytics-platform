@@ -75,9 +75,7 @@ def create_test_database():
             "order_date": order_date.strftime("%Y-%m-%d"),
             "total_amount": 0,
             "status": random.choice(["Completed", "Pending", "Cancelled"]),
-            "payment_method": random.choice(
-                ["credit_card", "debit_card", "paypal", "bank_transfer"]
-            ),
+            "payment_method": random.choice(["credit_card", "debit_card", "paypal", "bank_transfer"]),
         }
 
         # Add 1-3 items per order
@@ -115,9 +113,7 @@ def create_test_database():
                 "page_views": random.randint(1, 20),
                 "session_duration_minutes": random.randint(1, 120),
                 "device_type": random.choice(["desktop", "mobile", "tablet"]),
-                "traffic_source": random.choice(
-                    ["organic", "paid", "direct", "social"]
-                ),
+                "traffic_source": random.choice(["organic", "paid", "direct", "social"]),
                 "converted": random.choice([True, False]),  # Conversion tracking
             }
         )
@@ -246,21 +242,17 @@ def create_test_database():
         print(f"\nTesting key queries:")
 
         # Test orders with status
-        completed_orders = conn.execute(
-            "SELECT COUNT(*) FROM orders WHERE status = 'Completed'"
-        ).fetchone()[0]
+        completed_orders = conn.execute("SELECT COUNT(*) FROM orders WHERE status = 'Completed'").fetchone()[0]
         print(f"  Completed orders: {completed_orders:,}")
 
         # Test customer segments
-        segments = conn.execute(
-            "SELECT customer_segment, COUNT(*) FROM customers GROUP BY customer_segment"
-        ).fetchall()
+        segments = conn.execute("SELECT customer_segment, COUNT(*) FROM customers GROUP BY customer_segment").fetchall()
         print(f"  Customer segments: {dict(segments)}")
 
         # Test product performance
-        perf_count = conn.execute(
-            "SELECT COUNT(*) FROM product_performance WHERE total_quantity_sold > 0"
-        ).fetchone()[0]
+        perf_count = conn.execute("SELECT COUNT(*) FROM product_performance WHERE total_quantity_sold > 0").fetchone()[
+            0
+        ]
         print(f"  Products with sales: {perf_count:,}")
 
     print(f"✅ Test database created successfully at {db_path}")

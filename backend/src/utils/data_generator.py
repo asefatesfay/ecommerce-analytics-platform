@@ -70,14 +70,10 @@ class EcommerceDataGenerator:
             profile = fake.profile()
 
             # Customer segment (affects spending behavior)
-            segment = np.random.choice(
-                self.customer_segments, p=[0.3, 0.4, 0.25, 0.05]
-            )  # Realistic distribution
+            segment = np.random.choice(self.customer_segments, p=[0.3, 0.4, 0.25, 0.05])  # Realistic distribution
 
             # Acquisition channel
-            channel = np.random.choice(
-                self.acquisition_channels, p=[0.25, 0.2, 0.15, 0.15, 0.1, 0.08, 0.07]
-            )
+            channel = np.random.choice(self.acquisition_channels, p=[0.25, 0.2, 0.15, 0.15, 0.1, 0.08, 0.07])
 
             # Registration date (weighted towards recent)
             days_back = np.random.exponential(200)  # Exponential decay
@@ -103,9 +99,7 @@ class EcommerceDataGenerator:
             customers.append(customer)
 
         df = pd.DataFrame(customers)
-        print(
-            f"✅ Generated customers with segments: {df['customer_segment'].value_counts().to_dict()}"
-        )
+        print(f"✅ Generated customers with segments: {df['customer_segment'].value_counts().to_dict()}")
         return df
 
     def generate_products(self) -> pd.DataFrame:
@@ -128,9 +122,7 @@ class EcommerceDataGenerator:
                 "Toys": 0.8,
             }
 
-            base_price = np.random.lognormal(
-                3, 1
-            )  # Log-normal for realistic price distribution
+            base_price = np.random.lognormal(3, 1)  # Log-normal for realistic price distribution
             price = base_price * category_price_multipliers.get(category, 1.0)
 
             # Cost (margin varies by category)
@@ -148,17 +140,13 @@ class EcommerceDataGenerator:
                 "cost": round(cost, 2),
                 "weight_kg": round(np.random.lognormal(0, 1), 2),
                 "dimensions_cm": f"{fake.random_int(5,50)}x{fake.random_int(5,50)}x{fake.random_int(2,20)}",
-                "launch_date": fake.date_between(
-                    start_date=self.start_date.date(), end_date=self.end_date.date()
-                ),
+                "launch_date": fake.date_between(start_date=self.start_date.date(), end_date=self.end_date.date()),
                 "is_active": np.random.choice([True, False], p=[0.9, 0.1]),
             }
             products.append(product)
 
         df = pd.DataFrame(products)
-        print(
-            f"✅ Generated products across categories: {df['category'].value_counts().to_dict()}"
-        )
+        print(f"✅ Generated products across categories: {df['category'].value_counts().to_dict()}")
         return df
 
     def generate_orders(
@@ -197,9 +185,7 @@ class EcommerceDataGenerator:
         for order_id in range(1, self.num_orders + 1):
             # Select customer (weighted by segment activity)
             segment_weights = (
-                customers_df["customer_segment"]
-                .map(lambda x: segment_behavior[x]["order_frequency"])
-                .values
+                customers_df["customer_segment"].map(lambda x: segment_behavior[x]["order_frequency"]).values
             )
             customer = customers_df.sample(1, weights=segment_weights).iloc[0]
 
@@ -216,9 +202,7 @@ class EcommerceDataGenerator:
 
             # Adjust for seasonality
             month_weight = month_weights[order_date.month - 1]
-            if (
-                np.random.random() > month_weight / 1.5
-            ):  # Skip some orders based on seasonality
+            if np.random.random() > month_weight / 1.5:  # Skip some orders based on seasonality
                 continue
 
             # Order status (most orders completed)
@@ -228,9 +212,7 @@ class EcommerceDataGenerator:
             )
 
             # Shipping and payment info
-            shipping_cost = (
-                np.random.normal(10, 3) if np.random.random() > 0.1 else 0
-            )  # 10% free shipping
+            shipping_cost = np.random.normal(10, 3) if np.random.random() > 0.1 else 0  # 10% free shipping
             shipping_cost = max(0, shipping_cost)
 
             payment_method = np.random.choice(
@@ -261,15 +243,11 @@ class EcommerceDataGenerator:
             selected_products = products_df.sample(min(num_items, len(products_df)))
 
             for _, product in selected_products.iterrows():
-                quantity = max(
-                    1, np.random.poisson(2)
-                )  # Most orders have 1-3 of each item
+                quantity = max(1, np.random.poisson(2))  # Most orders have 1-3 of each item
 
                 # Price variations (promotions, dynamic pricing)
                 price_variation = np.random.normal(1.0, 0.1)  # ±10% price variation
-                unit_price = product["price"] * max(
-                    0.5, price_variation
-                )  # Min 50% of base price
+                unit_price = product["price"] * max(0.5, price_variation)  # Min 50% of base price
 
                 item_total = quantity * unit_price
                 order_total += item_total
@@ -310,17 +288,13 @@ class EcommerceDataGenerator:
         orders_df = pd.DataFrame(orders)
         order_items_df = pd.DataFrame(order_items)
 
-        print(
-            f"✅ Generated {len(orders_df):,} orders and {len(order_items_df):,} order items"
-        )
+        print(f"✅ Generated {len(orders_df):,} orders and {len(order_items_df):,} order items")
         print(f"   Order statuses: {orders_df['status'].value_counts().to_dict()}")
         print(f"   Avg order value: ${orders_df['total_amount'].mean():.2f}")
 
         return orders_df, order_items_df
 
-    def generate_web_analytics(
-        self, customers_df: pd.DataFrame, orders_df: pd.DataFrame
-    ) -> pd.DataFrame:
+    def generate_web_analytics(self, customers_df: pd.DataFrame, orders_df: pd.DataFrame) -> pd.DataFrame:
         """Generate web analytics data (sessions, page views, conversions)."""
         print("🌐 Generating web analytics data...")
 
@@ -354,9 +328,7 @@ class EcommerceDataGenerator:
             )
 
             # Device type
-            device_type = np.random.choice(
-                ["desktop", "mobile", "tablet"], p=[0.4, 0.5, 0.1]
-            )
+            device_type = np.random.choice(["desktop", "mobile", "tablet"], p=[0.4, 0.5, 0.1])
 
             # Session metrics
             session_duration = max(30, np.random.exponential(300))  # Seconds
@@ -376,18 +348,14 @@ class EcommerceDataGenerator:
                 "page_views": page_views,
                 "bounced": bounce_rate,
                 "converted": converted,
-                "revenue": (
-                    orders_df.iloc[session_id - 1]["total_amount"] if converted else 0
-                ),
+                "revenue": (orders_df.iloc[session_id - 1]["total_amount"] if converted else 0),
             }
             sessions.append(session)
 
         sessions_df = pd.DataFrame(sessions)
         print(f"✅ Generated {len(sessions_df):,} web sessions")
         print(f"   Conversion rate: {sessions_df['converted'].mean()*100:.1f}%")
-        print(
-            f"   Traffic sources: {sessions_df['traffic_source'].value_counts().to_dict()}"
-        )
+        print(f"   Traffic sources: {sessions_df['traffic_source'].value_counts().to_dict()}")
 
         return sessions_df
 

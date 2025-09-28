@@ -6,6 +6,23 @@ import { MetricCard } from '../components/MetricCard';
 import { SimpleChart } from '../components/SimpleChart';
 import { MetricDetailModal } from '../components/MetricDetailModal';
 import { formatCurrency, formatNumber, formatPercent } from '../lib/utils';
+import { OverviewMetrics, RevenueData, CustomerData } from '../types/analytics';
+
+type ChartDataPoint = {
+  period: string;
+  revenue: number;
+  orders: number;
+};
+
+type CustomerSegment = {
+  segment: string;
+  count: number;
+  value: string;
+};
+
+type DashboardCustomerData = {
+  segments: CustomerSegment[];
+};
 
 // Time-based filtering functions
 const generateTimeFilteredChartData = (timeRange: string) => {
@@ -39,7 +56,7 @@ const generateTimeFilteredChartData = (timeRange: string) => {
 };
 
 // Apply time filtering to real API overview data
-const applyTimeFilterToOverview = (apiData: any, timeRange: string) => {
+const applyTimeFilterToOverview = (apiData: OverviewMetrics | null, timeRange: string) => {
   if (!apiData) return null;
 
   const timeMultipliers = {
@@ -65,8 +82,8 @@ const applyTimeFilterToOverview = (apiData: any, timeRange: string) => {
 };
 
 // Apply time filtering to real API chart data
-const applyTimeFilterToChartData = (apiData: any, timeRange: string) => {
-  if (!apiData || !Array.isArray(apiData)) {
+const applyTimeFilterToChartData = (apiData: RevenueData | null, timeRange: string) => {
+  if (!apiData || !apiData.time_series || !Array.isArray(apiData.time_series)) {
     // Fallback to generated data if API data is not in expected format
     return generateTimeFilteredChartData(timeRange);
   }
@@ -81,20 +98,27 @@ const applyTimeFilterToChartData = (apiData: any, timeRange: string) => {
 
   const targetCount = periods[timeRange as keyof typeof periods] || 12;
   
+  // Convert API time series data to chart format
+  const chartData = apiData.time_series.map(item => ({
+    period: item.date,
+    revenue: item.revenue,
+    orders: item.orders
+  }));
+
   // Take the first N items from API data or pad with generated data
-  if (apiData.length >= targetCount) {
-    return apiData.slice(0, targetCount);
+  if (chartData.length >= targetCount) {
+    return chartData.slice(0, targetCount);
   } else {
     // If we don't have enough API data, supplement with generated data
     const supplementData = generateTimeFilteredChartData(timeRange);
-    return [...apiData, ...supplementData.slice(apiData.length)].slice(0, targetCount);
+    return [...chartData, ...supplementData.slice(chartData.length)].slice(0, targetCount);
   }
 };
 
 export default function Dashboard() {
-  const [overviewData, setOverviewData] = useState<any>(null);
-  const [revenueData, setRevenueData] = useState<any>(null);
-  const [customerData, setCustomerData] = useState<any>(null);
+  const [overviewData, setOverviewData] = useState<OverviewMetrics | null>(null);
+  const [revenueData, setRevenueData] = useState<ChartDataPoint[] | null>(null);
+  const [customerData, setCustomerData] = useState<DashboardCustomerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -136,8 +160,8 @@ export default function Dashboard() {
       // Fetch real API data first
       const [apiOverview, apiRevenue, apiCustomers] = await Promise.all([
         AnalyticsService.getOverview(),
-        AnalyticsService.getRevenue({ group_by: 'month', limit: 12 }),
-        AnalyticsService.getCustomers({ segment_type: selectedSegmentType as any })
+        AnalyticsService.getRevenue({ group_by: 'month' }),
+        AnalyticsService.getCustomers({ segment: selectedSegmentType })
       ]);
 
       console.log('📊 API Overview Data:', apiOverview);
@@ -152,7 +176,7 @@ export default function Dashboard() {
       setRevenueData(filteredChartData);
 
       // Generate customer data based on filtered overview data and API customers data
-      const customerSegments = apiCustomers?.segments || [];
+      const customerSegments = apiCustomers?.rfm_segments || [];
       const totalCustomers = filteredOverview?.total_customers || 1000;
       const mockCustomerData = {
         segments: selectedSegmentType === 'rfm' 
@@ -665,12 +689,12 @@ export default function Dashboard() {
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                 gap: '16px'
               }}>
-                {customerData.segments.map((segment: any, index: number) => (
+                {customerData.segments.map((segment: CustomerSegment, index: number) => (
                   <div
                     key={index}
                     onClick={() => {
                       // Show a tooltip-style message instead of alert
-                      const percentage = ((segment.count / overviewData.total_customers) * 100).toFixed(1);
+                      const percentage = overviewData ? ((segment.count / overviewData.total_customers) * 100).toFixed(1) : '0';
                       console.log(`${segment.segment} - ${formatNumber(segment.count)} customers (${percentage}%)`);
                     }}
                     style={{

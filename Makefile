@@ -88,6 +88,32 @@ test-api-manual: ## Run manual API tests (requires running backend)
 	cd $(BACKEND_DIR)/src/api && $(PYTHON) test_api.py
 	@echo "$(GREEN)✅ Manual API tests completed$(NC)"
 
+##@ Code Quality Commands
+
+lint: lint-backend lint-frontend ## Run all linting (Python + JavaScript)
+	@echo "$(GREEN)✅ All linting completed$(NC)"
+
+lint-backend: install-backend ## Run Python linting with flake8
+	@echo "$(BLUE)🔍 Running Python linting...$(NC)"
+	cd $(BACKEND_DIR) && $(VENV_PYTHON) -m flake8 src/
+	@echo "$(GREEN)✅ Python linting completed$(NC)"
+
+lint-frontend: ## Run JavaScript/TypeScript linting
+	@echo "$(BLUE)🔍 Running frontend linting...$(NC)"
+	cd $(FRONTEND_DIR) && $(NPM) run lint
+	@echo "$(GREEN)✅ Frontend linting completed$(NC)"
+
+format: format-backend ## Format code automatically
+	@echo "$(GREEN)✅ Code formatting completed$(NC)"
+
+format-backend: install-backend ## Format Python code with black
+	@echo "$(BLUE)🎨 Formatting Python code...$(NC)"
+	cd $(BACKEND_DIR) && $(VENV_PYTHON) -m black src/ --line-length 120
+	@echo "$(GREEN)✅ Python code formatted$(NC)"
+
+lint-fix: format-backend lint-backend ## Format code and run linting
+	@echo "$(GREEN)✅ Code formatted and linted$(NC)"
+
 ##@ Development Commands
 
 run-backend: setup-data ## Start the backend API server
@@ -144,20 +170,6 @@ docker-logs: ## Show Docker container logs
 	docker-compose logs -f
 
 ##@ Quality & Maintenance Commands
-
-lint: ## Run linting on all code
-	@echo "$(BLUE)🔍 Running linting...$(NC)"
-	@echo "Backend (if flake8 available):"
-	-cd $(BACKEND_DIR) && $(PYTHON) -m flake8 src/ tests/ || echo "$(YELLOW)⚠️ flake8 not available$(NC)"
-	@echo "Frontend:"
-	cd $(FRONTEND_DIR) && $(NPM) run lint || echo "$(YELLOW)⚠️ ESLint not configured$(NC)"
-
-format: ## Format all code
-	@echo "$(BLUE)✨ Formatting code...$(NC)"
-	@echo "Backend (if black available):"
-	-cd $(BACKEND_DIR) && $(PYTHON) -m black src/ tests/ || echo "$(YELLOW)⚠️ black not available$(NC)"
-	@echo "Frontend (if prettier available):"
-	-cd $(FRONTEND_DIR) && $(NPM) run format || echo "$(YELLOW)⚠️ Prettier not configured$(NC)"
 
 check-deps: ## Check for dependency issues
 	@echo "$(BLUE)🔍 Checking dependencies...$(NC)"

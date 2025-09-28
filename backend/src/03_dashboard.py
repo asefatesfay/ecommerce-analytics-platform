@@ -80,9 +80,7 @@ def load_data():
     web_sessions = conn.execute("SELECT * FROM web_sessions").fetchdf()
 
     # Load analytical views
-    monthly_revenue = conn.execute(
-        "SELECT * FROM monthly_revenue ORDER BY month"
-    ).fetchdf()
+    monthly_revenue = conn.execute("SELECT * FROM monthly_revenue ORDER BY month").fetchdf()
     customer_ltv = conn.execute("SELECT * FROM customer_ltv").fetchdf()
     product_performance = conn.execute("SELECT * FROM product_performance").fetchdf()
 
@@ -122,9 +120,7 @@ def create_kpi_metrics(data, date_filter=None):
     # Growth calculations (compare with previous period)
     if len(orders) > 0:
         orders["order_date"] = pd.to_datetime(orders["order_date"])
-        current_period_days = (
-            orders["order_date"].max() - orders["order_date"].min()
-        ).days
+        current_period_days = (orders["order_date"].max() - orders["order_date"].min()).days
 
         if current_period_days > 30:
             # Compare with previous month
@@ -132,18 +128,10 @@ def create_kpi_metrics(data, date_filter=None):
             recent_orders = orders[orders["order_date"] >= cutoff_date]
             prev_orders = orders[orders["order_date"] < cutoff_date]
 
-            recent_revenue = recent_orders[recent_orders["status"] == "Completed"][
-                "total_amount"
-            ].sum()
-            prev_revenue = prev_orders[prev_orders["status"] == "Completed"][
-                "total_amount"
-            ].sum()
+            recent_revenue = recent_orders[recent_orders["status"] == "Completed"]["total_amount"].sum()
+            prev_revenue = prev_orders[prev_orders["status"] == "Completed"]["total_amount"].sum()
 
-            revenue_growth = (
-                ((recent_revenue - prev_revenue) / prev_revenue * 100)
-                if prev_revenue > 0
-                else 0
-            )
+            revenue_growth = ((recent_revenue - prev_revenue) / prev_revenue * 100) if prev_revenue > 0 else 0
         else:
             revenue_growth = 0
     else:
@@ -165,8 +153,7 @@ def create_revenue_charts(data, date_filter=None):
     if date_filter:
         monthly_revenue["month"] = pd.to_datetime(monthly_revenue["month"])
         monthly_revenue = monthly_revenue[
-            (monthly_revenue["month"] >= date_filter[0])
-            & (monthly_revenue["month"] <= date_filter[1])
+            (monthly_revenue["month"] >= date_filter[0]) & (monthly_revenue["month"] <= date_filter[1])
         ]
 
     # Monthly revenue trend
@@ -182,9 +169,7 @@ def create_revenue_charts(data, date_filter=None):
 
     # Revenue by customer segment
     customer_ltv = data["customer_ltv"]
-    segment_revenue = (
-        customer_ltv.groupby("customer_segment")["lifetime_value"].sum().reset_index()
-    )
+    segment_revenue = customer_ltv.groupby("customer_segment")["lifetime_value"].sum().reset_index()
 
     fig_segment = px.pie(
         segment_revenue,
@@ -277,9 +262,7 @@ def create_marketing_charts(data):
         .agg({"session_id": "count", "converted": "sum", "revenue": "sum"})
         .reset_index()
     )
-    traffic_perf["conversion_rate"] = (
-        traffic_perf["converted"] / traffic_perf["session_id"] * 100
-    ).round(2)
+    traffic_perf["conversion_rate"] = (traffic_perf["converted"] / traffic_perf["session_id"] * 100).round(2)
 
     fig_traffic = px.scatter(
         traffic_perf,
@@ -309,9 +292,7 @@ def create_marketing_charts(data):
         )
         .reset_index()
     )
-    device_perf["conversion_rate"] = (
-        device_perf["converted"] / device_perf["session_id"] * 100
-    ).round(2)
+    device_perf["conversion_rate"] = (device_perf["converted"] / device_perf["session_id"] * 100).round(2)
 
     fig_device = px.bar(
         device_perf,
@@ -405,11 +386,7 @@ def main():
         st.metric(
             label="💰 Total Revenue",
             value=f"${kpis['total_revenue']:,.2f}",
-            delta=(
-                f"{kpis['revenue_growth']:+.1f}%"
-                if kpis["revenue_growth"] != 0
-                else None
-            ),
+            delta=(f"{kpis['revenue_growth']:+.1f}%" if kpis["revenue_growth"] != 0 else None),
         )
 
     with col2:
@@ -486,9 +463,7 @@ def main():
     # Data Tables
     st.subheader("📋 Detailed Data")
 
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["🏆 Top Products", "👑 Top Customers", "📊 Monthly Trends", "🔍 Recent Orders"]
-    )
+    tab1, tab2, tab3, tab4 = st.tabs(["🏆 Top Products", "👑 Top Customers", "📊 Monthly Trends", "🔍 Recent Orders"])
 
     with tab1:
         st.write("**Top 20 Products by Revenue**")

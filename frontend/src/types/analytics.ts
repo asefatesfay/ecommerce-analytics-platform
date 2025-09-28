@@ -11,23 +11,23 @@ export interface OverviewMetrics {
   avg_order_value: number;
   conversion_rate: number;
   revenue_growth: number;
-  order_growth: number;
-  customer_growth: number;
+  order_growth?: number;
+  customer_growth?: number;
 }
 
 export interface RevenueData {
   time_series: Array<{
-    period: string;
+    date: string;
     revenue: number;
     orders: number;
   }>;
-  by_category: Array<{
-    category: string;
+  by_segment: Array<{
+    segment: string;
     revenue: number;
-    percentage: number;
+    orders: number;
+    customers: number;
+    avg_order_value: number;
   }>;
-  total_revenue: number;
-  growth_rate: number;
 }
 
 export interface CustomerSegment {
@@ -38,13 +38,17 @@ export interface CustomerSegment {
 }
 
 export interface CustomerData {
-  segments: CustomerSegment[];
+  rfm_segments: Array<{
+    segment: string;
+    customers: number;
+    avg_recency_days: number;
+    avg_frequency: number;
+    avg_monetary: number;
+  }>;
   acquisition_channels: Array<{
     channel: string;
     customers: number;
-    conversion_rate: number;
     avg_ltv: number;
+    avg_orders: number;
   }>;
-  total_customers: number;
-  avg_ltv: number;
 }
