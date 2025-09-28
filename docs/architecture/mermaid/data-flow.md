@@ -22,10 +22,10 @@ flowchart LR
     end
 
     subgraph "API Endpoints"
-        EP1[/api/analytics/revenue - Revenue Trends]
-        EP2[/api/analytics/customers - Customer Behavior]
-        EP3[/api/analytics/products - Product Performance]
-        EP4[/api/reports - Custom Reports]
+        EP1["/api/analytics/revenue - Revenue Trends"]
+        EP2["/api/analytics/customers - Customer Behavior"]
+        EP3["/api/analytics/products - Product Performance"]
+        EP4["/api/reports - Custom Reports"]
     end
 
     subgraph "Frontend Components"
@@ -35,8 +35,8 @@ flowchart LR
     end
 
     subgraph "User Interface"
-        Browser[Web Browser - http://localhost:3000]
-        Mobile[Mobile Responsive - Tailwind CSS]
+        Browser["Web Browser - http://localhost:3000"]
+        Mobile["Mobile Responsive - Tailwind CSS"]
     end
 
     %% Data Flow
