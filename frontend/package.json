@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "lint:ci": "eslint --max-warnings 20",
+    "type-check": "tsc --noEmit",
     "test": "echo \"No tests specified yet - frontend tests coming soon!\" && exit 0",
     "test:ci": "echo \"Testing frontend build...\" && npm run build"
   },

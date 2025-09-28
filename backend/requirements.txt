@@ -4,6 +4,7 @@
 duckdb>=1.0.0
 pandas>=2.0.0
 numpy>=1.24.0
+faker>=28.4.0
 
 # REST API Framework
 fastapi>=0.104.0

@@ -8,6 +8,7 @@ orders, and web analytics data with realistic business patterns.
 """
 
 import sys
+import os
 import duckdb
 from pathlib import Path
 
@@ -25,14 +26,26 @@ def main():
     print("🏪 E-commerce Analytics Data Generation")
     print("=" * 50)
 
-    # Configuration
-    config = {
-        "num_customers": 10000,
-        "num_products": 1000,
-        "num_orders": 50000,
-        "start_date": "2022-01-01",
-        "end_date": "2024-12-31",
-    }
+    # Configuration - use minimal data for CI/testing
+    minimal_mode = os.environ.get("MINIMAL_DATA", "false").lower() == "true"
+    
+    if minimal_mode:
+        config = {
+            "num_customers": 100,
+            "num_products": 50,
+            "num_orders": 200,
+            "start_date": "2024-01-01",
+            "end_date": "2024-12-31",
+        }
+        print("🏃 Running in MINIMAL mode for faster setup")
+    else:
+        config = {
+            "num_customers": 10000,
+            "num_products": 1000,
+            "num_orders": 50000,
+            "start_date": "2022-01-01",
+            "end_date": "2024-12-31",
+        }
 
     print("Configuration:")
     for key, value in config.items():

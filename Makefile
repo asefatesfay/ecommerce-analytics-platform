@@ -5,7 +5,7 @@
 # It replicates the CI/CD pipeline steps for local development and testing.
 
 .PHONY: help install install-backend install-frontend clean test test-backend test-frontend \
-        build run-backend run-frontend run-full setup-data lint format check-deps \
+        build run-backend run-frontend run-full setup-data setup-data-full lint format type-check check-deps \
         docker-build docker-run docker-stop logs
 
 # Default target
@@ -65,21 +65,32 @@ install-frontend: ## Install Node.js frontend dependencies
 
 setup-data: create-venv ## Generate test database for local development
 	@echo "$(BLUE)🦆 Generating test database...$(NC)"
-	cd $(BACKEND_DIR)/src && $(VENV_PYTHON) create_test_db.py
+	@echo "$(YELLOW)Using minimal dataset for faster setup...$(NC)"
+	@rm -f $(BACKEND_DIR)/data/ecommerce.duckdb || true
+	cd $(BACKEND_DIR)/src && MINIMAL_DATA=true $(VENV_PYTHON) 01_data_generation.py
 	@echo "$(GREEN)✅ Test database created$(NC)"
+
+setup-data-full: create-venv ## Generate full test database with complete dataset
+	@echo "$(BLUE)🦆 Generating FULL test database...$(NC)"
+	@echo "$(YELLOW)⚠️ This may take several minutes...$(NC)"
+	@rm -f $(BACKEND_DIR)/data/ecommerce.duckdb || true
+	cd $(BACKEND_DIR)/src && $(VENV_PYTHON) 01_data_generation.py
+	@echo "$(GREEN)✅ Full test database created$(NC)"
 
 ##@ Testing Commands
 
 test: test-backend test-frontend ## Run all tests (backend + frontend)
 	@echo "$(GREEN)🎉 All tests completed!$(NC)"
 
-test-backend: setup-data ## Run backend API tests
+test-backend: install-backend setup-data ## Run backend API tests
 	@echo "$(BLUE)🧪 Running backend tests...$(NC)"
 	cd $(BACKEND_DIR) && PYTHONPATH=src $(VENV_PYTHON) -m pytest tests/ -v --tb=short
 	@echo "$(GREEN)✅ Backend tests completed$(NC)"
 
-test-frontend: ## Run frontend tests
-	@echo "$(BLUE)🧪 Running frontend tests...$(NC)"
+test-frontend: install-frontend ## Run frontend tests and type checking
+	@echo "$(BLUE)🧪 Running frontend tests and type checking...$(NC)"
+	cd $(FRONTEND_DIR) && $(NPM) run type-check
+	cd $(FRONTEND_DIR) && $(NPM) run lint
 	cd $(FRONTEND_DIR) && CI=true $(NPM) run test:ci
 	@echo "$(GREEN)✅ Frontend tests completed$(NC)"
 
@@ -98,10 +109,15 @@ lint-backend: install-backend ## Run Python linting with flake8
 	cd $(BACKEND_DIR) && $(VENV_PYTHON) -m flake8 src/
 	@echo "$(GREEN)✅ Python linting completed$(NC)"
 
-lint-frontend: ## Run JavaScript/TypeScript linting
+lint-frontend: install-frontend ## Run JavaScript/TypeScript linting
 	@echo "$(BLUE)🔍 Running frontend linting...$(NC)"
 	cd $(FRONTEND_DIR) && $(NPM) run lint
 	@echo "$(GREEN)✅ Frontend linting completed$(NC)"
+
+type-check: install-frontend ## Run TypeScript type checking
+	@echo "$(BLUE)🔍 Running TypeScript type checking...$(NC)"
+	cd $(FRONTEND_DIR) && $(NPM) run type-check
+	@echo "$(GREEN)✅ Type checking completed$(NC)"
 
 format: format-backend ## Format code automatically
 	@echo "$(GREEN)✅ Code formatting completed$(NC)"
@@ -116,13 +132,13 @@ lint-fix: format-backend lint-backend ## Format code and run linting
 
 ##@ Development Commands
 
-run-backend: setup-data ## Start the backend API server
+run-backend: install-backend setup-data ## Start the backend API server
 	@echo "$(BLUE)🚀 Starting backend server...$(NC)"
 	@echo "$(YELLOW)Backend will be available at: http://localhost:8000$(NC)"
 	@echo "$(YELLOW)API docs available at: http://localhost:8000/docs$(NC)"
 	cd $(BACKEND_DIR)/src/api && PYTHONPATH=.. $(VENV_PYTHON) -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-run-frontend: ## Start the frontend development server
+run-frontend: install-frontend ## Start the frontend development server
 	@echo "$(BLUE)🚀 Starting frontend server...$(NC)"
 	@echo "$(YELLOW)Frontend will be available at: http://localhost:3000$(NC)"
 	cd $(FRONTEND_DIR) && $(NPM) run dev
@@ -142,7 +158,7 @@ build-backend: ## Build backend Docker image
 	cd $(BACKEND_DIR) && docker build -t ecommerce-backend .
 	@echo "$(GREEN)✅ Backend image built$(NC)"
 
-build-frontend: ## Build frontend for production
+build-frontend: install-frontend ## Build frontend for production
 	@echo "$(BLUE)🔨 Building frontend...$(NC)"
 	cd $(FRONTEND_DIR) && $(NPM) run build
 	@echo "$(GREEN)✅ Frontend built$(NC)"
