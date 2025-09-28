@@ -54,6 +54,13 @@ jobs:
         cd frontend
         npm ci
 
+    - name: Generate test data
+      run: |
+        cd backend/src
+        python create_test_db.py
+      env:
+        PYTHONPATH: ${{ github.workspace }}/backend/src
+
     - name: Run Python tests
       run: |
         cd backend
